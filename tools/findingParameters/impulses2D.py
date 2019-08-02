@@ -1,7 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import sys
-import statistics as st
 import reader as rd
 import argparse
 
