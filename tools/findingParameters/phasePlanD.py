@@ -14,6 +14,8 @@ def velocity(px, py, pz) :
 
 
 def displayPhasePlanDiagram(index, speed, coordinates, deltaColor) :#col, nbBatchs) :
+	#colors = ['b', 'g', 'r', 'c', 'm', 'y', 'k']
+
 	speeds = [speed[index[i]] for i in range(len(index))]
 	coor = [coordinates[index[i]] for i in range(len(index))]
 
@@ -29,6 +31,49 @@ def speedFromImp(impulses) :
 
 	return speed
 
+def tmp() :
+	# Define an output queue
+	output = mp.Queue()
+
+	impulses = [impulses[0][:2150], impulses[1][:2150], impulses[2][:2150]]
+
+	#Determining the repartition oftasks betweens processes
+	nbCPU = mp.cpu_count()
+	nbTasks = len(impulses[0])//nbCPU
+	tasks = [0] + [nbTasks*i for i in range(1,nbCPU+1)]
+	tasks[-1] = len(impulses[0])
+
+	# Setup a list of processes that we want to run
+	imp = []
+	for i in range(nbCPU) :
+		imp += [[impulses[0][tasks[i]:tasks[i+1]], impulses[1][tasks[i]:tasks[i+1]], impulses[2][tasks[i]:tasks[i+1]]]]
+	
+	processes = [mp.Process(target=speedPara, args=(imp[i], i, output)) for i in range(nbCPU)]
+
+	# Run processes
+	for p in processes:
+	    p.start()
+
+	# Exit the completed processes
+	for p in processes:
+	    p.join()
+
+	print("done")
+	# Get process results from the output queue
+	speeds = sortSpeeds([output.get() for p in processes])
+	print("block")
+
+	return speeds
+
+
+def speedPara(impulses, index, output) :
+	speed = []
+	for i in range(len(impulses[0])) :
+		gamma = (impulses[0][i]**2 + impulses[1][i]**2 + impulses[2][i]**2 )**0.5
+		speed += [abs(impulses[0][i]) / gamma] #ABS !!!??
+
+	output.put([index,speed])
+
 
 def filterCoorImp(coordinates, impulses, step) :
 	liteCoor = [[[] for ax in range(3)] for sort in range(3)]
@@ -41,8 +86,37 @@ def filterCoorImp(coordinates, impulses, step) :
 
 	return [liteCoor, liteImp]
 
+#Returns the processes results in the right order
+def sortSpeeds(speeds) :
+	result = []
+	
+	tmp= 0
+	while (tmp<len(speeds)) :
+		for i in range(len(speeds)) :
+			if (speeds[i][0] == tmp) :
+				result += speeds[i][1]
+				tmp += 1
+
+	return result
+
 
 def makeCmap(nbBatchs) :
+	# rgbs = []
+	# nbCol = nbBatchs//5
+	# for i in range(nbCol) :
+	# 	rgbs += [(1, min(i/nbCol, 1), 0)]
+	
+	# for i in range(nbCol-1, -1, -1) :
+	# 	rgbs += [(max(i/nbCol,0), 1, 0)]
+	
+	# for i in range(nbCol) :
+	# 	rgbs += [(0, 1, min(i/nbCol, 1))]
+	
+	# for i in range(nbCol-1, -1, -1) :
+	# 	rgbs += [(1, max(i/nbCol, 1), 1)]
+
+
+	# cmap = matplotlib.colors.ListedColormap(rgbs)
 	cmap =  matplotlib.colors.ListedColormap([(i/nbBatchs,0.25,0.25) for i in range(nbBatchs)])
 
 	cmap.set_over('-1')
@@ -115,6 +189,9 @@ def init(file, step, nbBatchs) :
 #All particles are classified in "batchs" from the initialization depending on their velocity
 def runPhasePlan(files, nbBatchs, step) :
 		#INITIALISATION
+
+	#Setting default figure size
+	# matplotlib.rcParams['figure.figsize'] = (20.0, 5.0)
 
 	#Classify particles by their index, depending on their speed, display the result and return classification
 	[indexs, speeds] = init(files[0], step, nbBatchs)

@@ -33,8 +33,9 @@ def displayParticles1D(coordinates, impulses, sort, coordinate, fig) :
 
 
 #Calculates & Displays the impulse of each node following one axis for each sorts
-def displayNodes1D(coordinates, impulses, sort, coordinate, fig) :
+def displayNodes1D(coordinates, impulses, sort, coordinate, ax, fig) :
 	axis = ['x', 'y', 'z']
+	lenAxis = [102, 6, 6]
 
 	#Initialise pyplot figure
 	sp = fig.add_subplot(1, 3, sort+1)
@@ -50,9 +51,9 @@ def displayNodes1D(coordinates, impulses, sort, coordinate, fig) :
 
 	#CALCULATING THE IMPULSE OF EACH NODE
 	#Array containing the impulse associated to each node of the grid
-	nodesImpulse = [0 for i in range(102)]
+	nodesImpulse = [0 for i in range(lenAxis[ax])]
 	#Aray containing the number of particles associated to each node of the grid
-	nodesNumber = [0 for i in range(102)] #x-axis
+	nodesNumber = [0 for i in range(lenAxis[ax])] #x-axis
 	for i in range(len(impulses)) :
 		index = int(round(coordinates[i]/hx))
 		nodesImpulse[index] += impulses[i]
@@ -66,7 +67,7 @@ def displayNodes1D(coordinates, impulses, sort, coordinate, fig) :
 		nodesImpulse[i] /= nodesNumber[i]
 
 	#Drawing the impulse value for each node of the grid
-	plt.plot(np.arange(102), nodesImpulse, 'ro', markersize=1)
+	plt.plot(np.arange(lenAxis[ax]), nodesImpulse, 'ro', markersize=1)
 
 
 def run1D(dataPath, axis, nodes, speed) :
@@ -87,14 +88,14 @@ def run1D(dataPath, axis, nodes, speed) :
 					coordinates = coordinates[ax]
 
 					if (speed) :
-						impulses = impulsesToSpeed(impulses)[ax]
+						impulses = impulseToSpeed(impulses)[ax]
 					else :
 						impulses = impulses[ax]# = dataSet[1 + sort][1][3 + ax]
 
 					if (nodes) :
-						displayNodes1D(coordinates, impulses, sort, (ax+1), fig)
+						displayNodes1D(coordinates, impulses, sort, (ax+1), ax, fig)
 					else :
-						displayParticles1D(coordinates, impulses, sort, (ax+1), fig)
+						displayParticles1D(coordinates, impulses, sort, (ax+1), ax, fig)
 
 	plt.show()
 
