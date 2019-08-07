@@ -95,7 +95,7 @@ def run1D(dataPath, axis, nodes, speed) :
 					if (nodes) :
 						displayNodes1D(coordinates, impulses, sort, (ax+1), ax, fig)
 					else :
-						displayParticles1D(coordinates, impulses, sort, (ax+1), ax, fig)
+						displayParticles1D(coordinates, impulses, sort, (ax+1), fig)
 
 	plt.show()
 
