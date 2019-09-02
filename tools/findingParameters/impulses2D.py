@@ -79,15 +79,15 @@ def run2D(dataPath, ax, speed) :
 		#Loading y-axis values
 		if (ax == "y") :
 			coordinate += [1]
-			tmp = rd.readCoorImp(dataPath, 1)
-			coordinates += [tmp[0]]
-			impulses += [tmp[1]]
+			tmpCoorImp = rd.readCoorImp(dataPath, 1)
+			coordinates += [tmpCoorImp[0]]
+			impulses += [tmpCoorImp[1]]
 
 		elif (ax == "z") :
 			coordinate += [2]
-			tmp = rd.readCoorImp(dataPath, 2)
-			coordinates += [tmp[0]]
-			impulses += [tmp[1]]
+			tmpCoorImp = rd.readCoorImp(dataPath, 2)
+			coordinates += [tmpCoorImp[0]]
+			impulses += [tmpCoorImp[1]]
 
 		gnuplotFile(coordinates, impulses, sort, coordinate, dataPath)
 

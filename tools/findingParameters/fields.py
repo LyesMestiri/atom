@@ -8,6 +8,7 @@ import argparse
 def findSinFunction(field) :
 	#DETERMINIG AMPLITUDE
 	amplitude = max(np.abs(field))
+	print(amplitude)
 
 
 	#DETERMINIG ANGULAR FREQUENCY
@@ -78,12 +79,16 @@ def runField(files, curve, sorts=[0], y=3, z=2) :
 		#load data
 		figures = []
 		for sort in sorts :
+			#Load field
 			field = rd.readField(file, sort) #field[102][6][6]
+
+			#Prepare figure
 			figures += [plt.figure(file + " - " + fields[sort] + " field")]
 			plt.xlabel('Position')
 			yLab = fields[sort] + " Field x"
 			plt.ylabel(yLab)
 			plt.title("Y = " + str(y) + " - Z = " + str(z))
+
 			displayField(field, y, z, curve)
 
 	plt.show()

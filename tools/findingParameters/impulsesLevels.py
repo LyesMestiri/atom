@@ -25,10 +25,10 @@ def categorize(impulses, size, minim, delta) :
 	return categories
 
 
-# Send the variance to the output
+# Send the mean to the output
 def partMean(impulses, output) :
-	var = statistics.mean(impulses) # compute variance
-	output.put(var)
+	m = statistics.mean(impulses) # compute mean
+	output.put(m)
 
 
 # Send the variance to the output
@@ -49,12 +49,12 @@ def groupVar(variances, tasks) :
 
 # Displays the number of particles in each impulses-category of width delta
 def displayImpulse(impulses, velocity, categories, delta, sort, coordinate, options, col, file) :
+	#Load options & variables
 	[sep, showMean, showVariance, showCurve] = options
-
 	colors = ['b', 'r', 'k', "g", 'c', 'm', 'y']
-
 	axis = ['x', 'y', 'z']
 
+	#Title & Axis of the graph
 	title = "Sort " + str(sort+1) + " - Axis " + str(axis[coordinate])
 	plt.title(title)
 	ylabel = "Number particles"
@@ -62,14 +62,15 @@ def displayImpulse(impulses, velocity, categories, delta, sort, coordinate, opti
 	xlabel = str(axis[coordinate])
 	plt.xlabel(xlabel)
 
+
 	if (showMean) :
-		# determine yAxis max which corresponds to the impulse category containing the more particles
+		# determine yAxis max which corresponds to the impulse level containing the more particles
 		amplitude = max(categories) - min(categories)
 
-		# Define an output queue
+		# Define an output queue for parallel computation
 		output = mp.Queue()
 
-		# Determining the repartition oftasks betweens processes
+		# Determining the repartition of tasks betweens processes
 		nbCPU = mp.cpu_count()
 		nbTasks = len(impulses)//nbCPU
 		tasks = [0] + [nbTasks*i for i in range(1,nbCPU+1)]
@@ -93,6 +94,7 @@ def displayImpulse(impulses, velocity, categories, delta, sort, coordinate, opti
 		# Displays Mean
 		plt.axvline(x = mean, markersize=0.1, color=colors[col%len(colors)])
 		plt.text(x = mean, y=0.75*amplitude, s="m:"+str(mean), verticalalignment='center', color=colors[col%len(colors)])
+
 
 	if (showVariance) :
 		# Define an output queue
@@ -123,11 +125,13 @@ def displayImpulse(impulses, velocity, categories, delta, sort, coordinate, opti
 		# Displays Variance
 		plt.text(x = mean, y=0.7*amplitude, s="v:"+str(variance), verticalalignment='center', color=colors[col%len(colors)])
 
+
 	if (showCurve) :
 		# Display the function followed by the impulses
 		fImpulses = norm(velocity, amplitude, mean, variance)
 		label = "sort " + str(sort+1) + " - axis " + str(coordinate+1) 
 		plt.plot(velocity, fImpulses, markersize=0.1, label=label, color=colors[col%len(colors)])
+
 
 	# Display the Impulses classified by categories
 	plt.plot(velocity, categories, 'ro', markersize=0.2, label=file, color=colors[col%len(colors)])
@@ -142,6 +146,7 @@ def prepareDisplay(files, sort, ax, options, nbLvl) :
 		# load data
 		impulses = rd.readImpulse(files[i], sort, ax)
 
+
 		# Getting bounds of Impulses
 		minim = min(impulses)
 		maxim = max(impulses)
@@ -152,8 +157,9 @@ def prepareDisplay(files, sort, ax, options, nbLvl) :
 		# Array representing the categories of impulses (X axis)
 		velocity = np.arange(minim, maxim, delta)
 
-		# Array containing the number of particles in each categories
+		# Array containing the number of particles in each categories (Y axis)
 		categories = categorize(impulses, nbLvl, minim, delta)
+
 
 		if sep :
 			name = files[i] + " : sort " + str(sort+1) + " - axis " + axis[ax] 
